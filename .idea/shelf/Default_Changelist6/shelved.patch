@@ -1,0 +1,14 @@
+Index: hello.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import os\r\nfrom flask import Flask, render_template, session, redirect, url_for\r\nfrom flask_bootstrap import Bootstrap\r\nfrom flask_moment import Moment\r\nfrom flask_wtf import FlaskForm\r\nfrom wtforms import StringField, SubmitField\r\nfrom wtforms.validators import DataRequired\r\nfrom flask_sqlalchemy import SQLAlchemy\r\n\r\nbasedir = os.path.abspath(os.path.dirname(__file__))\r\n\r\napp = Flask(__name__)\r\napp.config['SECRET_KEY'] = 'hard to guess string'\r\napp.config['SQLALCHEMY_DATABASE_URI'] =\\\r\n    'sqlite:///' + os.path.join(basedir, 'data.sqlite')\r\napp.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False\r\n\r\nbootstrap = Bootstrap(app)\r\nmoment = Moment(app)\r\ndb = SQLAlchemy(app)\r\n\r\n\r\nclass Role(db.Model):\r\n    __tablename__ = 'roles'\r\n    id = db.Column(db.Integer, primary_key=True)\r\n    name = db.Column(db.String(64), unique=True)\r\n    users = db.relationship('User', backref='role', lazy='dynamic')\r\n\r\n    def __repr__(self):\r\n        return '<Role %r>' % self.name\r\n\r\n\r\nclass User(db.Model):\r\n    __tablename__ = 'users'\r\n    id = db.Column(db.Integer, primary_key=True)\r\n    username = db.Column(db.String(64), unique=True, index=True)\r\n    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))\r\n\r\n    def __repr__(self):\r\n        return '<User %r>' % self.username\r\n\r\n\r\nclass NameForm(FlaskForm):\r\n    name = StringField('What is your name?', validators=[DataRequired()])\r\n    submit = SubmitField('Submit')\r\n\r\n\r\n@app.errorhandler(404)\r\ndef page_not_found(e):\r\n    return render_template('404.html'), 404\r\n\r\n\r\n@app.errorhandler(500)\r\ndef internal_server_error(e):\r\n    return render_template('500.html'), 500\r\n\r\n\r\n@app.route('/', methods=['GET', 'POST'])\r\ndef index():\r\n    form = NameForm()\r\n    if form.validate_on_submit():\r\n        user = User.query.filter_by(username=form.name.data).first()\r\n        if user is None:\r\n            user = User(username=form.name.data)\r\n            db.session.add(user)\r\n            db.session.commit()\r\n            session['known'] = False\r\n        else:\r\n            session['known'] = True\r\n        session['name'] = form.name.data\r\n        return redirect(url_for('index'))\r\n    return render_template('index.html', form=form, name=session.get('name'),\r\n                           known=session.get('known', False))\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- hello.py	(revision da7b613ea9411ba6bfe87cceab3af7d32004aa03)
++++ hello.py	(date 1606762111115)
+@@ -71,3 +71,4 @@
+         return redirect(url_for('index'))
+     return render_template('index.html', form=form, name=session.get('name'),
+                            known=session.get('known', False))
++

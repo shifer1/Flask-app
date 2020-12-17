@@ -1,0 +1,18 @@
+Index: hello.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from flask import Flask, render_template\r\nfrom flask.ext.script import Manager\r\nfrom flask.ext.bootstrap import Bootstrap\r\nfrom flask.ext.moment import Moment\r\nfrom flask.ext.wtf import Form\r\nfrom wtforms import StringField, SubmitField\r\nfrom wtforms.validators import Required\r\n\r\napp = Flask(__name__)\r\napp.config['SECRET_KEY'] = 'hard to guess string'\r\n\r\nmanager = Manager(app)\r\nbootstrap = Bootstrap(app)\r\nmoment = Moment(app)\r\n\r\n\r\nclass NameForm(Form):\r\n    name = StringField('What is your name?', validators=[Required()])\r\n    submit = SubmitField('Submit')\r\n\r\n\r\n@app.errorhandler(404)\r\ndef page_not_found(e):\r\n    return render_template('404.html'), 404\r\n\r\n\r\n@app.errorhandler(500)\r\ndef internal_server_error(e):\r\n    return render_template('500.html'), 500\r\n\r\n\r\n@app.route('/', methods=['GET', 'POST'])\r\ndef index():\r\n    name = None\r\n    form = NameForm()\r\n    if form.validate_on_submit():\r\n        name = form.name.data\r\n        form.name.data = ''\r\n    return render_template('index.html', form=form, name=name)\r\n\r\n\r\nif __name__ == '__main__':\r\n    manager.run()\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- hello.py	(revision 9b853c0af157ef8f4441770aa3dee690d92fc100)
++++ hello.py	(date 1605721665653)
+@@ -7,6 +7,8 @@
+ from wtforms.validators import Required
+ 
+ app = Flask(__name__)
++
++
+ app.config['SECRET_KEY'] = 'hard to guess string'
+ 
+ manager = Manager(app)

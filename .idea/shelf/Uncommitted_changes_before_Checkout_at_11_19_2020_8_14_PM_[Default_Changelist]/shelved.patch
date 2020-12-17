@@ -1,0 +1,31 @@
+Index: templates/index.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>{% extends \"base.html\" %}\r\n\r\n{% block title %}Flasky{% endblock %}\r\n\r\n{% block page_content %}\r\n<div class=\"page-header\">\r\n    <h1>Hello World!</h1>\r\n</div>\r\n<p>The local date and time is {{ moment(current_time).format('LLL') }}.</p>\r\n<p>That was {{ moment(current_time).fromNow(refresh=True) }}.</p>\r\n{% endblock %}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- templates/index.html	(revision 98b306e55c45104bbac726711eaef8fae088bbe6)
++++ templates/index.html	(date 1605804178827)
+@@ -1,11 +1,18 @@
+ {% extends "base.html" %}
++{% import "bootstrap/wtf.html" as wtf %}
+ 
+ {% block title %}Flasky{% endblock %}
+ 
+ {% block page_content %}
+ <div class="page-header">
+-    <h1>Hello World!</h1>
++    <h1>Hello, {% if name %}{{ name }}{% else %} User {% endif %}} </h1>
+ </div>
+-<p>The local date and time is {{ moment(current_time).format('LLL') }}.</p>
+-<p>That was {{ moment(current_time).fromNow(refresh=True) }}.</p>
++<form method="POST">
++{{ form.hidden_tag() }}
++{{ form.name.label }} {{ form.name() }}
++{{ form.submit() }}
++</form>
++<!--<p>The local date and time is {{ moment(current_time).format('LLL') }}.</p>-->
++<!--<p>That was {{ moment(current_time).fromNow(refresh=True) }}.</p>-->
+ {% endblock %}
++{% wtf.quick_form(form) %}

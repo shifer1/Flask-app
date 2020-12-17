@@ -1,0 +1,15 @@
+Index: templates/base.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>{% extends \"bootstrap/base.html\" %}\r\n\r\n{% block title %}Flasky{% endblock %}\r\n\r\n{% block head %}\r\n{{ super() }}\r\n<link rel=\"shortcut icon\" href=\"{{ url_for('static', filename='favicon.ico') }}\" type=\"image/x-icon\">\r\n<link rel=\"icon\" href=\"{{ url_for('static', filename='favicon.ico') }}\" type=\"image/x-icon\">\r\n{% endblock %}\r\n\r\n{% block navbar %}\r\n<div class=\"navbar navbar-inverse\" role=\"navigation\">\r\n    <div class=\"container\">\r\n        <div class=\"navbar-header\">\r\n            <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".navbar-collapse\">\r\n                <span class=\"sr-only\">Toggle navigation</span>\r\n                <span class=\"icon-bar\"></span>\r\n                <span class=\"icon-bar\"></span>\r\n                <span class=\"icon-bar\"></span>\r\n            </button>\r\n            <a class=\"navbar-brand\" href=\"/\">Flasky</a>\r\n        </div>\r\n        <div class=\"navbar-collapse collapse\">\r\n            <ul class=\"nav navbar-nav\">\r\n                <li><a href=\"/\">Home</a></li>\r\n            </ul>\r\n        </div>\r\n    </div>\r\n</div>\r\n{% endblock %}\r\n\r\n{% block content %}\r\n<div class=\"container\">\r\n    {% block page_content %}{% endblock %}\r\n</div>\r\n{% endblock %}\r\n\r\n{% block scripts %}\r\n{{ super() }}\r\n{{ moment.include_moment() }}\r\n{% endblock %}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- templates/base.html	(revision 98b306e55c45104bbac726711eaef8fae088bbe6)
++++ templates/base.html	(date 1605720646189)
+@@ -38,4 +38,5 @@
+ {% block scripts %}
+ {{ super() }}
+ {{ moment.include_moment() }}
++{{ moment.locale('fa') }}
+ {% endblock %}

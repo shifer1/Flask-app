@@ -1,0 +1,69 @@
+Index: hello.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from flask import Flask, render_template\r\nfrom flask_bootstrap import Bootstrap\r\nfrom flask_moment import Moment\r\nfrom flask_wtf import FlaskForm\r\nfrom wtforms import StringField, SubmitField\r\nfrom wtforms.validators import DataRequired\r\n\r\napp = Flask(__name__)\r\napp.config['SECRET_KEY'] = 'hard to guess string'\r\n\r\nbootstrap = Bootstrap(app)\r\nmoment = Moment(app)\r\n\r\n\r\nclass NameForm(FlaskForm):\r\n    name = StringField('What is your name?', validators=[DataRequired()])\r\n    submit = SubmitField('Submit')\r\n\r\n\r\n@app.errorhandler(404)\r\ndef page_not_found(e):\r\n    return render_template('404.html'), 404\r\n\r\n\r\n@app.errorhandler(500)\r\ndef internal_server_error(e):\r\n    return render_template('500.html'), 500\r\n\r\n\r\n@app.route('/', methods=['GET', 'POST'])\r\ndef index():\r\n    name = None\r\n    form = NameForm()\r\n    if form.validate_on_submit():\r\n        name = form.name.data\r\n        form.name.data = ''\r\n    return render_template('index.html', form=form, name=name)\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- hello.py	(revision f998be1d3df0d6e9a3400a9d26009c39c8176802)
++++ hello.py	(date 1605815771661)
+@@ -1,4 +1,4 @@
+-from flask import Flask, render_template
++from flask import Flask, render_template, redirect, session, url_for, flash
+ from flask_bootstrap import Bootstrap
+ from flask_moment import Moment
+ from flask_wtf import FlaskForm
+@@ -29,9 +29,11 @@
+ 
+ @app.route('/', methods=['GET', 'POST'])
+ def index():
+-    name = None
+     form = NameForm()
+     if form.validate_on_submit():
+-        name = form.name.data
+-        form.name.data = ''
+-    return render_template('index.html', form=form, name=name)
++        old_name = session.get('name')
++        if old_name is not None and old_name != form.name.data:
++            flash(f'You have changed your name! => {old_name}')
++            session['name'] = form.name.data
++            return redirect(url_for('index'))
++    return render_template('index.html', forms=form, name=session.get('name'))
+Index: templates/index.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>{% extends \"base.html\" %}\r\n{% import \"bootstrap/wtf.html\" as wtf %}\r\n\r\n{% block title %}Flasky{% endblock %}\r\n\r\n{% block page_content %}\r\n<div class=\"page-header\">\r\n    <h1>Hello, {% if name %}{{ name }}{% else %}Stranger{% endif %}!</h1>\r\n</div>\r\n{{ wtf.quick_form(form) }}\r\n{% endblock %}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- templates/index.html	(revision f998be1d3df0d6e9a3400a9d26009c39c8176802)
++++ templates/index.html	(date 1605814841249)
+@@ -7,5 +7,5 @@
+ <div class="page-header">
+     <h1>Hello, {% if name %}{{ name }}{% else %}Stranger{% endif %}!</h1>
+ </div>
+-{{ wtf.quick_form(form) }}
++{{ wtf.quick_form(forms) }}
+ {% endblock %}
+Index: templates/base.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>{% extends \"bootstrap/base.html\" %}\r\n\r\n{% block title %}Flasky{% endblock %}\r\n\r\n{% block head %}\r\n{{ super() }}\r\n<link rel=\"shortcut icon\" href=\"{{ url_for('static', filename='favicon.ico') }}\" type=\"image/x-icon\">\r\n<link rel=\"icon\" href=\"{{ url_for('static', filename='favicon.ico') }}\" type=\"image/x-icon\">\r\n{% endblock %}\r\n\r\n{% block navbar %}\r\n<div class=\"navbar navbar-inverse\" role=\"navigation\">\r\n    <div class=\"container\">\r\n        <div class=\"navbar-header\">\r\n            <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\".navbar-collapse\">\r\n                <span class=\"sr-only\">Toggle navigation</span>\r\n                <span class=\"icon-bar\"></span>\r\n                <span class=\"icon-bar\"></span>\r\n                <span class=\"icon-bar\"></span>\r\n            </button>\r\n            <a class=\"navbar-brand\" href=\"/\">Flasky</a>\r\n        </div>\r\n        <div class=\"navbar-collapse collapse\">\r\n            <ul class=\"nav navbar-nav\">\r\n                <li><a href=\"/\">Home</a></li>\r\n            </ul>\r\n        </div>\r\n    </div>\r\n</div>\r\n{% endblock %}\r\n\r\n{% block content %}\r\n<div class=\"container\">\r\n    {% block page_content %}{% endblock %}\r\n</div>\r\n{% endblock %}\r\n\r\n{% block scripts %}\r\n{{ super() }}\r\n{{ moment.include_moment() }}\r\n{% endblock %}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- templates/base.html	(revision f998be1d3df0d6e9a3400a9d26009c39c8176802)
++++ templates/base.html	(date 1605815501800)
+@@ -31,6 +31,12 @@
+ 
+ {% block content %}
+ <div class="container">
++    {% for message in get_flashed_messages() %}
++    <div class="alert alert-warning">
++        <button type="button" class="close" data-dismiss="alert">&times;</button>
++        {{ message }}
++    </div>
++    {% endfor %}
+     {% block page_content %}{% endblock %}
+ </div>
+ {% endblock %}

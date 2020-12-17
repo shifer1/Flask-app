@@ -1,0 +1,53 @@
+Index: hello.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from flask import Flask, render_template, session, redirect, url_for, flash\r\nfrom flask_bootstrap import Bootstrap\r\nfrom flask_moment import Moment\r\nfrom flask_wtf import FlaskForm\r\nfrom wtforms import StringField, SubmitField\r\nfrom wtforms.validators import DataRequired\r\n\r\napp = Flask(__name__)\r\napp.config['SECRET_KEY'] = 'hard to guess string'\r\n\r\nbootstrap = Bootstrap(app)\r\nmoment = Moment(app)\r\n\r\n\r\nclass NameForm(FlaskForm):\r\n    name = StringField('What is your name?', validators=[DataRequired()])\r\n    submit = SubmitField('Submit')\r\n\r\n\r\n@app.errorhandler(404)\r\ndef page_not_found(e):\r\n    return render_template('404.html'), 404\r\n\r\n\r\n@app.errorhandler(500)\r\ndef internal_server_error(e):\r\n    return render_template('500.html'), 500\r\n\r\n\r\n@app.route('/', methods=['GET', 'POST'])\r\ndef index():\r\n    form = NameForm()\r\n    if form.validate_on_submit():\r\n        old_name = session.get('name')\r\n        if old_name is not None and old_name != form.name.data:\r\n            flash('Looks like you have changed your name!')\r\n        session['name'] = form.name.data\r\n        return redirect(url_for('index'))\r\n    return render_template('index.html', form=form, name=session.get('name'))\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- hello.py	(revision 8f933d99ccfc39dbca48eb51df9ad5b8c23890c9)
++++ hello.py	(date 1606754774709)
+@@ -2,15 +2,43 @@
+ from flask_bootstrap import Bootstrap
+ from flask_moment import Moment
+ from flask_wtf import FlaskForm
++from sqlalchemy.orm import backref
+ from wtforms import StringField, SubmitField
+ from wtforms.validators import DataRequired
++import os
++from flask_sqlalchemy import SQLAlchemy
+ 
+ app = Flask(__name__)
++app.config['SQLALCHEMY_DATABSE_URI'] = 'mysql;//root:@localhost:3307/sqlalchemy'
++app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
++db =SQLAlchemy(app)
++
+ app.config['SECRET_KEY'] = 'hard to guess string'
+ 
+ bootstrap = Bootstrap(app)
+ moment = Moment(app)
+ 
++class Role(db.Model):
++    __tablename__ = 'roles'
++    id = db.Column(db.Integer, primary_key=True)
++    name = db.Column(db.String(64), unique=True)
++
++    users = db.relationship('User', backref='role')
++
++    def __repr__(self):
++        return '<Role %r>' % self.name
++
++class user(db.Model):
++    __tablename__ = 'users'
++    id = db.Column(db.Integer, primary_key=True)
++    username = db.Column(db.String(64), unique=True, index=True)
++
++    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
++
++    def __repr__(self):
++        return '<User %r' % self.username
++
++
+ 
+ class NameForm(FlaskForm):
+     name = StringField('What is your name?', validators=[DataRequired()])
